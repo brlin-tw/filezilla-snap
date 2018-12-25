@@ -29,12 +29,6 @@ version-script: ./snap/local/build-utilities/set-snap-version.bash
 confinement: devmode
 grade: devel
 
-# Refer the following documentation for asserting interface plugs and slots in a security confined snap:
-# Interface management - doc - snapcraft.io
-# https://docs.snapcraft.io/interface-management/6154
-# Supported interfaces - doc - snapcraft.io
-# https://docs.snapcraft.io/supported-interfaces/7744
-# Non-A/C: Non-autoconnect interface
 plugs:
   # For snaps with a graphical user interface:
   desktop:
@@ -44,13 +38,11 @@ plugs:
   wayland:
 
   # Storage access
-  #home:
-  #removable-media: # Non-A/C
+  home:
+  removable-media: # Non-A/C
 
   # Network access
-  #network:
-
-#slots:
+  network:
 
 # Apps that are exposed by the snap package
 # If the _app_name_ is identical with the _snap_name_ it can be directly run
