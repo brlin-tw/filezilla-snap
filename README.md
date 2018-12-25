@@ -67,7 +67,7 @@ You may generate the unique hash by using the following command in terminal:
 | [林博仁<br>Buo-ren, Lin](https://github.com/Lin-Buo-Ren) |
 
 ## Upstream
-| [![Tim Kosse's possible gravatar](http://gravatar.com/avatar/f055a3440505aab48711958686358fe2?s=128)](mailto:tim.kosse@filezilla-project.org) | <a href='https://forum.filezilla-project.org' target='_blank'><img src='snap/gui/filezilla.svg' alt='FileZilla Forums logo' title='The logo of FileZilla Forums' style='width: 128px' /></a> | <a href='https://trac.filezilla-project.org/ticket/11366'><img src='https://www.edgewall.org/gfx/trac_logo.png' alt='Logo of Trac' title='The logo of Trac' /></a> |
+| [![Tim Kosse's possible gravatar](http://gravatar.com/avatar/f055a3440505aab48711958686358fe2?s=128)](mailto:tim.kosse@filezilla-project.org) | [![FileZilla Forums logo](pictures/filezilla.128px.svg "The logo of FileZilla Forums")](https://forum.filezilla-project.org) | <a href='https://trac.filezilla-project.org/ticket/11366'><img src='https://www.edgewall.org/gfx/trac_logo.png' alt='Logo of Trac' title='The logo of Trac' /></a> |
 | :-: | :-: | :-: |
 | [Tim Kosse](mailto:tim.kosse@filezilla-project.org) | [FileZilla Forums](https://forum.filezilla-project.org) | [#11366 (Snap or Flatpack?) – FileZilla](https://trac.filezilla-project.org/ticket/11366) |
 
