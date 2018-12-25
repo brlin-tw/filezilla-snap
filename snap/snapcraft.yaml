@@ -52,11 +52,6 @@ apps:
       "${SNAP}"/bin/filezilla
     desktop: share/applications/filezilla.desktop
 
-# Run `snapcraft help sources` for supported keywords on pulling a part's source ingredients
-# Run `snapcraft plugins` for supported build helper plugins
-# Run `snapcraft help plugins` for supported keywords on building a part
-# For `override-*` scriptlets used to modify behavior of certain part's lifecycle phase, check out:
-# https://docs.snapcraft.io/scriptlets/4892
 parts:
   # Utility programs to help with package building
   build-utilities:
@@ -77,47 +72,43 @@ parts:
     - -bin/README.*
 
   # Program patches to solve issues that can't be solved by tweaking in runtime
-  patches:
-    source: snap/local/patches
-    plugin: dump
-    organize:
-      '*': assets/patches/
-    prime:
-    - -*
+  #patches:
+    #source: snap/local/patches
+    #plugin: dump
+    #organize:
+      #'*': assets/patches/
+    #prime:
+    #- -*
 
   # Helper programs that can be called at snap runtime
-  helpers:
-    source: snap/local/helpers
-    plugin: dump
-    organize:
-      '*': bin/
-    stage:
-    - -bin/README.*
-
-  # Remote part for fixing the glibc locales(and gnu gettext I18N support)
-  # This part is only required for non GUI apps that don't uses the desktop-launch launchers
-  #locales-launch:
+  #helpers:
+    #source: snap/local/helpers
+    #plugin: dump
+    #organize:
+      #'*': bin/
+    #stage:
+    #- -bin/README.*
 
   # Remote part for recording the exact revision for each part during building
-  parts-meta-info:
+  #parts-meta-info:
 
   # Remote part for support of various desktop technologies
   # Refer: https://github.com/ubuntu/snapcraft-desktop-helpers/blob/master/snapcraft.yaml
-  desktop-gtk3: # for zenity
+  #desktop-gtk3:
 
   # Optional auxiliary part for displaying simple dialogs for better user experience, powered by Zenity
   # https://forum.snapcraft.io/t/the-zenity-remote-part/8793
-  zenity:
+  #zenity:
     # This part or part recipe is needed until LP#1766878 is fixed
     #
     # Bug #1766878 “$SNAPCRAFT_PROJECT_NAME used in a remote part expands to wrong value” : Bugs : Snapcraft
     # https://bugs.launchpad.net/snapcraft/+bug/1766878
-    configflags:
-    - --datarootdir=/snap/$SNAPCRAFT_PROJECT_NAME/current/share
-    - --disable-libnotify
-    - --disable-webkitgtk
-    organize:
-      snap/$SNAPCRAFT_PROJECT_NAME/current: /
+    #configflags:
+    #- --datarootdir=/snap/$SNAPCRAFT_PROJECT_NAME/current/share
+    #- --disable-libnotify
+    #- --disable-webkitgtk
+    #organize:
+      #snap/$SNAPCRAFT_PROJECT_NAME/current: /
 
   filezilla:
     after:
