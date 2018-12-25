@@ -13,15 +13,16 @@ init(){
 		upstream_version \
 		packaging_revision
 
-	upstream_version="$(
-		git \
-			-C parts/my-app-part/src \
-			describe \
-			--always \
-			--dirty=-d \
-			--tags \
-		| sed s/^v//
-	)"
+# FIXME: Source VCS is SVN
+# 	upstream_version="$(
+# 		git \
+# 			-C parts/filezilla/src \
+# 			describe \
+# 			--always \
+# 			--dirty=-d \
+# 			--tags \
+# 		| sed s/^v//
+# 	)"
 
 	packaging_revision="$(
 		git \
@@ -35,7 +36,7 @@ init(){
 	printf \
 		-- \
 		'%s' \
-		"${upstream_version}+pkg-${packaging_revision}"
+		"unknown+pkg-${packaging_revision}"
 
 	exit 0
 }

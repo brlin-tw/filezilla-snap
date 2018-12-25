@@ -1,16 +1,16 @@
-# Unofficial Snap Packaging for [Project]
-This is the unofficial snap packaging for [Project], [Snaps are universal Linux packages](https://snapcraft.io).
+# Unofficial Snap Packaging for FileZilla
+This is the unofficial snap packaging for FileZilla, [Snaps are universal Linux packages](https://snapcraft.io).
 
 Refer [snap/README.md](snap/README.md) for user-oriented information.
 
 ## Remaining Tasks
-Snapcrafters ([join us](https://forum.snapcraft.io/t/join-snapcrafters/1325)) are working to land snap install documentation and the [snapcraft.yaml](https://github.com/Lin-Buo-Ren/snapcrafters-template-plus/blob/master/snap/snapcraft.yaml) upstream so [Project] can authoritatively publish future releases.
+Snapcrafters ([join us](https://forum.snapcraft.io/t/join-snapcrafters/1325)) are working to land snap install documentation and the [snapcraft.yaml](https://github.com/Lin-Buo-Ren/snapcrafters-template-plus/blob/master/snap/snapcraft.yaml) upstream so FileZilla can authoritatively publish future releases.
 
 - [x] *Import* the [Snapcrafters Template Plus](https://github.com/Lin-Buo-Ren/snapcrafters-template-plus) repository to your own GitHub account and name it as _snap_name_-snap (or any valid name you prefer) using GitHub's [Import repository](https://github.com/new/import) feature
   - It is recommended to *avoid forking the template repository* unless you're working on the template itself because you can only fork a repository once
-- [ ] Update the description of the repository
-- [ ] Update logos and references to `[Project]`, `my-awesome-app` and other placeholder names in `README.md`, `snap/README.md`, and `snap/snapcraft.yaml`
-- [ ] Add upstream contact information to this `README.md`
+- [x] Update the description of the repository
+- [x] Update logos and references to `FileZilla`, `filezilla` and other placeholder names in `README.md`, `snap/README.md`, and `snap/snapcraft.yaml`
+- [x] Add upstream contact information to this `README.md`
 - [ ] Create a snap that runs in `devmode`, [or in `classic` confinement if that's not possible](https://forum.snapcraft.io/t/subtle-differences-between-devmode-and-classic-confinement-snaps/7267)
     - [ ] If the snap must be packaged under `classic` confinement, file a [classic confinement request](https://forum.snapcraft.io/t/process-for-reviewing-classic-confinement-snaps/1460) topic in the Snapcraft Forum, under the `store` topic category - [template](https://github.com/Lin-Buo-Ren/snapcrafters-template-plus/wiki/Classic-Confinement-Request-Template) - [link]()
 - [ ] Add a screenshot to `snap/README.md`
@@ -61,20 +61,13 @@ You may generate the unique hash by using the following command in terminal:
 
 -->
 
-<!-- 
-
 ## The Snapcrafters
-| [![Your Name](http://gravatar.com/avatar/bc0bced65e963eb5c3a16cab8b004431/?s=128)](https://github.com/yourname) |
+| [![林博仁(Buo-ren, Lin)'s avatar](http://gravatar.com/avatar/66a5b84972e73e895d5d68d48b1e1e21/?s=128)](https://github.com/Lin-Buo-Ren) |
 | :-: |
-| [Your Name](https://github.com/_your_github_id_) |
-
---> 
-
-<!-- Uncomment and modify this when you have upstream contacts
+| [林博仁<br>Buo-ren, Lin](https://github.com/Lin-Buo-Ren) |
 
 ## Upstream
-| [![Upstream Name](http://gravatar.com/avatar/bc0bced65e963eb5c3a16cab8b004431?s=128)](https://github.com/upstreamname) |
-| :-: |
-| [Upstream Name](https://github.com/_upstream_github_id_) |
+| [![Tim Kosse's possible gravatar](http://gravatar.com/avatar/f055a3440505aab48711958686358fe2?s=128)](mailto:tim.kosse@filezilla-project.org) | <a href='https://forum.filezilla-project.org' target='_blank'><img src='snap/gui/filezilla.svg' alt='FileZilla Forums logo' title='The logo of FileZilla Forums' style='width: 128px' /></a> | <a href='https://trac.filezilla-project.org/ticket/11366'><img src='https://www.edgewall.org/gfx/trac_logo.png' alt='Logo of Trac' title='The logo of Trac' /></a> |
+| :-: | :-: | :-: |
+| [Tim Kosse](mailto:tim.kosse@filezilla-project.org) | [FileZilla Forums](https://forum.filezilla-project.org) | [#11366 (Snap or Flatpack?) – FileZilla](https://trac.filezilla-project.org/ticket/11366) |
 
--->
