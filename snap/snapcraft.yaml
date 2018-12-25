@@ -114,10 +114,8 @@ parts:
     after:
     - build-utilities # for patch-desktop-entries.*
 
-    source: snap/local/empty
-    #source-type:
-    #source-tag:
-    #source-depth:
+    source: https://svn.filezilla-project.org/svn/FileZilla3/tags/3.39.0
+    source-type: svn
 
     plugin: nil
 
