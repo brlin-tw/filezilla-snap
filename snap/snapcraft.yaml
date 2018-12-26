@@ -110,6 +110,46 @@ parts:
     #organize:
       #snap/$SNAPCRAFT_PROJECT_NAME/current: /
 
+  libfilezilla:
+    after:
+    # For speeding up build
+    - ccache
+
+    source: https://download.filezilla-project.org/libfilezilla/libfilezilla-0.15.1.tar.bz2
+    source-checksum: sha512/d557f7636bfc3958b8558fab3384b0ea84caea594566d39c051f20f02dfd71213369c50df282a3f7d2dd757038bd26e9722214839dab965cb7cde9733d59883a
+    #source: https://svn.filezilla-project.org/svn/libfilezilla/tags/0.15.1
+    #source-type: svn
+
+    plugin: autotools
+    build-packages:
+    # DISABLED: Documentation
+    #- doxygen
+    #- texlive-latex-base
+
+    - g++
+
+    # DISABLED: Unittests
+    #- libcppunit-dev
+
+    - nettle-dev
+    - pkg-config
+
+    filesets:
+      #FIXME: Documentation files not appeared in installdir
+      library-headers:
+      - include
+      library-libtool:
+      - lib/*.la
+      library-pkgconfig:
+      - lib/pkgconfig
+      library-shared:
+      - lib/**.so*
+      library-static:
+      - lib/**.a
+
+    prime:
+    - $library-shared
+
   filezilla:
     after:
     - build-utilities # for patch-desktop-entries.*
