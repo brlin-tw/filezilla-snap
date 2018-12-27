@@ -405,6 +405,7 @@ parts:
 
     stage-packages:
     - libnotify4
+    - libpugixml1v5
     - libsm6
     - libxxf86vm1
 
