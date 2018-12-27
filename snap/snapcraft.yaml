@@ -13,7 +13,7 @@
 #   https://forum.snapcraft.io/c/doc
 # For support refer to the snapcraft section in the Snapcraft Forum:
 # https://forum.snapcraft.io/c/snapcraft
-name: filezilla
+name: filezilla-brlin
 summary: The free FTP client solution
 icon: snap/gui/filezilla.svg
 description: |
