@@ -7,9 +7,7 @@
 
 **This is the unofficial snap for FileZilla**, *"The free FTP client solution"*. It works on Ubuntu, Fedora, Debian, and other major Linux distributions.
 
-<!-- Uncomment and modify this when you are provided a build status badge
 [![Build Status Badge of the `filezilla` Snap](https://build.snapcraft.io/badge/Lin-Buo-Ren/filezilla-snap.svg "Build Status of the `filezilla` snap")](https://build.snapcraft.io/user/Lin-Buo-Ren/filezilla-snap)
--->
 
 ![Screenshot of the Snapped Application](local/screenshots/main-interface.png "Screenshot of the Snapped Application")
 
