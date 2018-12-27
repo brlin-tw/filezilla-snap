@@ -150,14 +150,213 @@ parts:
     prime:
     - $library-shared
 
+  # Remote part for a recent wxWidgets 3.0.X distribution
+  wxwidgets-3-0:
+    after:
+    - ccache
+
+  nettle:
+    after:
+    - ccache
+
+    source: https://git.lysator.liu.se/nettle/nettle.git
+    source-branch: release-3.4-fixes
+    source-depth: 1
+
+    plugin: autotools
+    build-packages:
+    # Documentation
+    - ghostscript
+    - texinfo
+    - texlive
+
+    # Public key crypto
+    - libgmp-dev
+
+    filesets:
+      docs-info:
+      - share/info/*.info
+      docs-info-exclude:
+      - -share/info/dir
+      executables:
+      - bin
+      library-headers:
+      - include
+      library-pkgconfig:
+      - lib/pkgconfig
+      library-shared:
+      - lib/**.so*
+      library-static:
+      - lib/**.a
+
+    stage:
+    - $docs-info-exclude
+
+    prime:
+    - $library-shared
+
+  libtasn1:
+    after:
+    - ccache
+
+    source: https://gitlab.com/gnutls/libtasn1.git
+    # Maintenance branch not yet available
+    #source-branch: libtasn1_4_x
+    source-tag: libtasn1_4_13
+    source-depth: 1
+
+    # https://gitlab.com/gnutls/libtasn1/blob/master/README-alpha
+    plugin: make
+    build-packages:
+    - help2man
+    - gtk-doc-tools
+    - libtool
+    - texinfo
+    - texlive
+    - texlive-extra-utils
+    - texlive-generic-recommended
+    - valgrind
+
+    override-build: |
+      set \
+        -o errexit \
+        -o nounset
+
+      env ADDFLAGS=--prefix= \
+        make bootstrap
+
+      snapcraftctl build
+
+    filesets:
+      docs-gtk:
+      - share/gtk-doc
+      docs-info:
+      - share/info/*.info
+      docs-info-exclude:
+      - -share/info/dir
+      docs-man:
+      - share/man
+      executables:
+      - bin
+      library-headers:
+      - include
+      library-libtool:
+      - lib/**.la
+      library-pkgconfig:
+      - lib/pkgconfig
+      library-shared:
+      - lib/**.so*
+      library-static:
+      - lib/**.a
+
+    stage:
+    - $docs-info-exclude
+
+    prime:
+    - $library-shared
+
+  gnutls:
+    after:
+    - ccache
+    - nettle
+    - libtasn1
+
+    #source: https://www.gnupg.org/ftp/gcrypt/gnutls/v3.6/gnutls-3.6.5.tar.xz
+    source: https://gitlab.com/gnutls/gnutls.git
+    source-depth: 1
+
+    # Not created yet
+    #source-branch: gnutls_3_6_x
+    source-tag: gnutls_3_6_5
+
+    plugin: autotools
+    # https://www.gnutls.org/download.html
+    build-packages:
+    - autogen
+
+    # Guile bindings
+    - guile-2.0-dev
+
+    # Too old in Ubuntu 16.04(4.7), use libtasn1 part
+    #- libtasn1-6-dev
+
+    # Unit testing framework dependency
+    - libcmocka-dev
+
+    - libidn2-0-dev
+    - libp11-kit-dev
+
+    # Trousers(TPM Support)
+    - libtspi-dev
+
+    - libunbound-dev
+    - libunistring-dev
+
+    # Too old in Ubuntu 16.04(3.2), use nettle part
+    #- nettle-dev
+
+    - pkg-config
+
+    filesets:
+      docs-info:
+      - share/info
+      - -share/info/dir
+      docs-manpages:
+      - share/man
+      docs-misc:
+      - share/doc
+      executables:
+      - bin
+      library-bindings-guile:
+      - lib/guile
+      - share/guile
+      library-headers:
+      - include
+      library-libtool:
+      - lib/**.la
+      - -lib/guile
+      library-pkgconfig:
+      - lib/pkgconfig
+      library-shared:
+      - lib/**.so*
+      - -lib/guile
+      library-static:
+      - lib/**.a
+      localization:
+      - share/locale
+
+    prime:
+    - $executables
+    - $library-shared
+    - $localization
+
   filezilla:
     after:
-    - build-utilities # for patch-desktop-entries.*
+    # For patch-desktop-entries.*
+    - build-utilities
 
-    source: https://svn.filezilla-project.org/svn/FileZilla3/tags/3.39.0
-    source-type: svn
+    # For speeding up build
+    - ccache
 
-    plugin: nil
+    - gnutls
+    - libfilezilla
+    - wxwidgets-3-0
+
+    source: https://download.filezilla-project.org/client/FileZilla_3.39.0_src.tar.bz2
+    source-checksum: sha256/fb515e93775e5ad94ff2755b39605b62b3e8fcfc1125757f411d8f580d16444f
+    #source: https://svn.filezilla-project.org/svn/FileZilla3/tags/3.39.0
+    #source: https://svn.filezilla-project.org/svn/FileZilla3/trunk
+    #source-type: svn
+
+    plugin: autotools
+    build-packages:
+    # The libgnutls distribution in Ubuntu 16.04 is too old(3.4.10)
+    #- libgnutls-dev
+
+    # The wxWidgets distribution in Ubuntu 16.04 is too old(3.0.2)
+    #- libwxgtk3.0-dev
+
+    - pkg-config
 
     override-stage: |
       set \
