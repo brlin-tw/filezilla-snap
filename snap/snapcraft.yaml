@@ -63,7 +63,7 @@ plugs:
   screen-inhibit-control:
 
 apps:
-  filezilla:
+  filezilla-brlin:
     command: >
       bin/desktop-launch
       "${SNAP}"/bin/filezilla-launch
