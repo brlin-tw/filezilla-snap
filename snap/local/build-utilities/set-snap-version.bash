@@ -13,16 +13,19 @@ init(){
 		upstream_version \
 		packaging_revision
 
-# FIXME: Source VCS is SVN
-# 	upstream_version="$(
-# 		git \
-# 			-C parts/filezilla/src \
-# 			describe \
-# 			--always \
-# 			--dirty=-d \
-# 			--tags \
-# 		| sed s/^v//
-# 	)"
+	upstream_version="$(
+		# FIXME: Should be more robust
+		grep \
+			'^AC_INIT(' \
+			<parts/filezilla/src/configure.ac \
+		| cut \
+			--characters=9- \
+		| cut \
+			--delimiter=, \
+			--fields=2 \
+		| sed \
+			's/^.\(.*\).$/\1/'
+	)"
 
 	packaging_revision="$(
 		git \
@@ -36,7 +39,7 @@ init(){
 	printf \
 		-- \
 		'%s' \
-		"unknown+pkg-${packaging_revision}"
+		"${upstream_version}+pkg-${packaging_revision}"
 
 	exit 0
 }
