@@ -328,6 +328,7 @@ parts:
     - libidn2-0
     - libopts25
     - libunbound2
+    - libunistring0
 
     filesets:
       docs-info:
