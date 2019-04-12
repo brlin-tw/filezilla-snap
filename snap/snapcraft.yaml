@@ -14,8 +14,8 @@
 # For support refer to the snapcraft section in the Snapcraft Forum:
 # https://forum.snapcraft.io/c/snapcraft
 name: filezilla
+title: FileZilla (UNOFFICIAL)
 summary: The free FTP client solution
-icon: snap/gui/filezilla.svg
 description: |
   This is the unofficial snap of FileZilla®, the free FTP solution. The FileZilla Client not only supports FTP, but also FTP over TLS (FTPS) and SFTP. It is open source software distributed free of charge under the terms of the GNU General Public License.
 
@@ -23,9 +23,11 @@ description: |
 
       https://github.com/Lin-Buo-Ren/filezilla-snap/issues
 
-version: determined-by-version-script
-version-script: ./snap/local/build-utilities/set-snap-version.bash
+icon: snap/gui/filezilla.svg
+license: GPL-2.0+
 
+adopt-info: filezilla
+base: core18
 confinement: devmode
 grade: devel
 
@@ -43,6 +45,13 @@ plugs:
 
   # Network access
   network:
+
+  # GNOME and Gtk runtime via content sharing
+  # https://forum.snapcraft.io/t/desktop-app-support-gtk/6834
+  gnome-3-28-1804:
+    interface: content
+    target: $SNAP/gnome-platform
+    default-provider: gnome-3-28-1804
 
   # gtk-common-themes
   gsettings:
@@ -63,20 +72,21 @@ plugs:
   screen-inhibit-control:
 
 apps:
-  filezilla-brlin:
-    command: >
-      bin/desktop-launch
-      "${SNAP}"/bin/filezilla-launch
-      "${SNAP}"/bin/filezilla
+  filezilla:
+    adapter: full
+    command: bin/filezilla
+    command-chain:
+    - bin/desktop-launch
+    - bin/filezilla-launch
     desktop: share/applications/filezilla.desktop
 
 parts:
-  # Utility programs to help with package building
-  build-utilities:
-    source: snap/local/build-utilities
+  # Files to patch the files in the snap
+  patching:
+    source: snap/local/patching
     plugin: dump
     organize:
-      '*': assets/build-utilities/
+      '*': patching/
     prime:
     - -*
 
@@ -89,47 +99,59 @@ parts:
     stage:
     - -bin/README.*
 
-  # Program patches to solve issues that can't be solved by tweaking in runtime
-  #patches:
-    #source: snap/local/patches
-    #plugin: dump
-    #organize:
-      #'*': assets/patches/
-    #prime:
-    #- -*
+  # Programs to modify the behavior of each step of the snapcraft lifecycles
+  scriptlets:
+    source: snap/local/scriptlets
+    plugin: dump
+    organize:
+      '*': scriptlets/
+    prime:
+    - -*
 
-  # Helper programs that can be called at snap runtime
-  #helpers:
-    #source: snap/local/helpers
-    #plugin: dump
-    #organize:
-      #'*': bin/
-    #stage:
-    #- -bin/README.*
-
-  # Remote part for recording the exact revision for each part during building
-  parts-meta-info:
+  # Check out the tagged release revision if it isn't promoted to the stable channel
+  # https://forum.snapcraft.io/t/selective-checkout-check-out-the-tagged-release-revision-if-it-isnt-promoted-to-the-stable-channel/10617
+  selective-checkout:
+    plugin: nil
+    build-packages:
+    - git
+    - subversion
+    stage-snaps:
+    - selective-checkout
+    prime:
+    - -*
 
   # Remote part for support of various desktop technologies
   # Refer: https://github.com/ubuntu/snapcraft-desktop-helpers/blob/master/snapcraft.yaml
-  desktop-gtk3:
+  desktop-gnome-platform:
+    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
+    source-depth: 1
+    source-subdir: gtk
 
-  # Optional auxiliary part for displaying simple dialogs for better user experience, powered by Zenity
-  # https://forum.snapcraft.io/t/the-zenity-remote-part/8793
-  zenity:
-    after:
-    - ccache
+    plugin: make
+    build-packages:
+    - build-essential
+    - libgtk-3-dev
+    override-build: |
+      snapcraftctl build
+      mkdir -pv $SNAPCRAFT_PART_INSTALL/gnome-platform
 
-    # This part or part recipe is needed until LP#1766878 is fixed
-    #
-    # Bug #1766878 “$SNAPCRAFT_PROJECT_NAME used in a remote part expands to wrong value” : Bugs : Snapcraft
-    # https://bugs.launchpad.net/snapcraft/+bug/1766878
-    configflags:
-    - --datarootdir=/snap/$SNAPCRAFT_PROJECT_NAME/current/share
-    - --disable-libnotify
-    - --disable-webkitgtk
-    organize:
-      snap/$SNAPCRAFT_PROJECT_NAME/current: /
+  # Integrate custom dialogs in your snap - doc - snapcraft.io
+  # https://forum.snapcraft.io/t/integrate-custom-dialogs-in-your-snap/10825
+  zenity-integration:
+    plugin: nil
+    stage-snaps:
+    - zenity-integration
+
+  # Speed up snap build iteration during packaging development
+  # https://forum.snapcraft.io/t/the-ccache-build-snap/10820
+  ccache:
+    plugin: nil
+    stage-snaps:
+    - ccache/latest/edge
+    stage:
+    - bin/ccache
+    prime:
+    - -*
 
   libfilezilla:
     after:
@@ -142,6 +164,9 @@ parts:
     #source-type: svn
 
     plugin: autotools
+    configflags:
+    - CC=ccache gcc
+    - CXX=ccache g++
     build-packages:
     # DISABLED: Documentation
     #- doxygen
@@ -171,215 +196,41 @@ parts:
     prime:
     - $library-shared
 
-  # Remote part for a recent wxWidgets 3.0.X distribution
-  wxwidgets-3-0:
-    after:
-    - ccache
-
-  nettle:
-    after:
-    - ccache
-
-    source: https://git.lysator.liu.se/nettle/nettle.git
-    source-branch: release-3.4-fixes
-    source-depth: 1
-
-    plugin: autotools
-    build-packages:
-    # Documentation
-    - ghostscript
-    - texinfo
-    - texlive
-
-    # Public key crypto
-    - libgmp-dev
-
-    filesets:
-      docs-info:
-      - share/info/*.info
-      docs-info-exclude:
-      - -share/info/dir
-      executables:
-      - bin
-      library-headers:
-      - include
-      library-pkgconfig:
-      - lib/pkgconfig
-      library-shared:
-      - lib/**.so*
-      library-static:
-      - lib/**.a
-
-    stage:
-    - $docs-info-exclude
-
-    prime:
-    - $library-shared
-
-  libtasn1:
-    after:
-    - ccache
-
-    source: https://gitlab.com/gnutls/libtasn1.git
-    # Maintenance branch not yet available
-    #source-branch: libtasn1_4_x
-    source-tag: libtasn1_4_13
-    source-depth: 1
-
-    # https://gitlab.com/gnutls/libtasn1/blob/master/README-alpha
-    plugin: make
-    build-packages:
-    - bison
-    - help2man
-    - gtk-doc-tools
-    - libtool
-    - texinfo
-    - texlive
-    - texlive-extra-utils
-    - texlive-generic-recommended
-    - valgrind
-
-    override-build: |
-      set \
-        -o errexit \
-        -o nounset
-
-      env ADDFLAGS=--prefix= \
-        make bootstrap
-
-      snapcraftctl build
-
-    filesets:
-      docs-gtk:
-      - share/gtk-doc
-      docs-info:
-      - share/info/*.info
-      docs-info-exclude:
-      - -share/info/dir
-      docs-man:
-      - share/man
-      executables:
-      - bin
-      library-headers:
-      - include
-      library-libtool:
-      - lib/**.la
-      library-pkgconfig:
-      - lib/pkgconfig
-      library-shared:
-      - lib/**.so*
-      library-static:
-      - lib/**.a
-
-    stage:
-    - $docs-info-exclude
-
-    prime:
-    - $library-shared
-
-  gnutls:
-    after:
-    - ccache
-    - nettle
-    - libtasn1
-
-    source: https://www.gnupg.org/ftp/gcrypt/gnutls/v3.6/gnutls-3.6.5.tar.xz
-
-    # DISABLED: submoduule too much history :(
-    #source: https://gitlab.com/gnutls/gnutls.git
-    #source-depth: 1
-
-    # Not created yet
-    #source-branch: gnutls_3_6_x
-
-    #source-tag: gnutls_3_6_5
-
-    plugin: autotools
-    # https://www.gnutls.org/download.html
-    build-packages:
-    - autogen
-
-    - gperf
-
-    # Guile bindings
-    - guile-2.0-dev
-
-    # Too old in Ubuntu 16.04(4.7), use libtasn1 part
-    #- libtasn1-6-dev
-
-    # Unit testing framework dependency
-    - libcmocka-dev
-
-    - libidn2-0-dev
-    - libp11-kit-dev
-
-    # Trousers(TPM Support)
-    - libtspi-dev
-
-    - libunbound-dev
-    - libunistring-dev
-
-    # Too old in Ubuntu 16.04(3.2), use nettle part
-    #- nettle-dev
-
-    - pkg-config
-
-    stage-packages:
-    - libidn2-0
-    - libopts25
-    - libunbound2
-    - libunistring0
-
-    filesets:
-      docs-info:
-      - share/info
-      - -share/info/dir
-      docs-manpages:
-      - share/man
-      docs-misc:
-      - share/doc
-      executables:
-      - bin
-      library-bindings-guile:
-      - lib/guile
-      - share/guile
-      library-headers:
-      - include
-      library-libtool:
-      - lib/**.la
-      - -lib/guile
-      library-pkgconfig:
-      - lib/pkgconfig
-      library-shared:
-      - lib/**.so*
-      - -lib/guile
-      library-static:
-      - lib/**.a
-      localization:
-      - share/locale
-
-    prime:
-    - $executables
-    - $library-shared
-    - $localization
+  # The wxWidgets SDK Stage Snaps
+  # https://forum.snapcraft.io/t/the-wxwidgets-sdk-stage-snaps/10877
+  #wxwidgets-sdk:
+    #plugin: nil
+    #stage-snaps:
+    #- wxwidgets-sdk-gtk3
+    #filesets:
+      #library-shared:
+      #- '**/lib/**/*.so*'
+    #prime:
+    #- $library-shared
 
   filezilla:
     after:
     # For patch-desktop-entries.*
-    - build-utilities
+    - patching
 
     # For speeding up build
     - ccache
 
-    - gnutls
+    #- gnutls
     - libfilezilla
-    - wxwidgets-3-0
+    - selective-checkout
+    #- wxwidgets-sdk
 
-    source: https://download.filezilla-project.org/client/FileZilla_3.39.0_src.tar.bz2
-    source-checksum: sha256/fb515e93775e5ad94ff2755b39605b62b3e8fcfc1125757f411d8f580d16444f
+    source: https://download.filezilla-project.org/client/FileZilla_3.41.2_src.tar.bz2
+    source-checksum: sha256/c23be24831f115748b4fd2c126840f0318e5b4da5cd3da1b03daaef9f7dff017
     #source: https://svn.filezilla-project.org/svn/FileZilla3/tags/3.39.0
     #source: https://svn.filezilla-project.org/svn/FileZilla3/trunk
     #source-type: svn
+    override-pull: |
+      set -o nounset
+      snapcraftctl pull
+      "${SNAPCRAFT_STAGE}"/scriptlets/selective-checkout \
+        --append-packaging-revision
 
     plugin: autotools
     configflags:
@@ -392,22 +243,24 @@ parts:
     # No use for snap(we still allow manual update check though)
     - --disable-autoupdatecheck
 
-    build-packages:
-    # The libgnutls distribution in Ubuntu 16.04 is too old(3.4.10)
-    #- libgnutls-dev
+    - CC=ccache gcc
+    - CXX=ccache g++
 
+    build-packages:
+    - libgnutls28-dev
     - libpugixml-dev
     - libsqlite3-dev
-
-    # The wxWidgets distribution in Ubuntu 16.04 is too old(3.0.2)
-    #- libwxgtk3.0-dev
-
+    - libwxgtk3.0-gtk3-dev
     - pkg-config
+
+    # Required by configure program for some reason
+    - xdg-utils
 
     stage-packages:
     - libnotify4
     - libpugixml1v5
     - libsm6
+    - libwxgtk3.0-gtk3-0v5
     - libxxf86vm1
 
     filesets:
@@ -428,11 +281,10 @@ parts:
       localization:
       - share/locale
 
-    override-stage: |
+
+    override-prime: |
       set \
-        -o errexit \
         -o nounset
 
-      snapcraftctl stage
-
-      ./assets/build-utilities/patch-desktop-entries.bash
+      snapcraftctl prime
+      "${SNAPCRAFT_STAGE}"/patching/patch-desktop-entries.bash
