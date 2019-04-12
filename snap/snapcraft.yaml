@@ -247,6 +247,7 @@ parts:
     - CXX=ccache g++
 
     build-packages:
+    - gettext
     - libgnutls28-dev
     - libpugixml-dev
     - libsqlite3-dev
