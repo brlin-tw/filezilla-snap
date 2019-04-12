@@ -282,7 +282,6 @@ parts:
       localization:
       - share/locale
 
-
     override-prime: |
       set \
         -o nounset
