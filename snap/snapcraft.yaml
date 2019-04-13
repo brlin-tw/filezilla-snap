@@ -198,15 +198,21 @@ parts:
 
   # The wxWidgets SDK Stage Snaps
   # https://forum.snapcraft.io/t/the-wxwidgets-sdk-stage-snaps/10877
-  #wxwidgets-sdk:
-    #plugin: nil
-    #stage-snaps:
-    #- wxwidgets-sdk-gtk3
-    #filesets:
-      #library-shared:
-      #- '**/lib/**/*.so*'
-    #prime:
-    #- $library-shared
+  wxwidgets-sdk:
+    plugin: nil
+    stage-snaps:
+    - wxwidgets-sdk-gtk3
+    stage-packages:
+    # Crash dialog support
+    - binutils
+    filesets:
+      library-shared:
+      - '**/lib/**/*.so*'
+      crash-dialog-support:
+      - usr/bin/*addr2line
+    prime:
+    - $library-shared
+    - $crash-dialog-support
 
   filezilla:
     after:
@@ -219,7 +225,7 @@ parts:
     #- gnutls
     - libfilezilla
     - selective-checkout
-    #- wxwidgets-sdk
+    - wxwidgets-sdk
 
     source: https://download.filezilla-project.org/client/FileZilla_3.41.2_src.tar.bz2
     source-checksum: sha256/c23be24831f115748b4fd2c126840f0318e5b4da5cd3da1b03daaef9f7dff017
@@ -251,7 +257,7 @@ parts:
     - libgnutls28-dev
     - libpugixml-dev
     - libsqlite3-dev
-    - libwxgtk3.0-gtk3-dev
+    #- libwxgtk3.0-gtk3-dev
     - pkg-config
 
     # Required by configure program for some reason
@@ -261,7 +267,7 @@ parts:
     - libnotify4
     - libpugixml1v5
     - libsm6
-    - libwxgtk3.0-gtk3-0v5
+    #- libwxgtk3.0-gtk3-0v5
     - libxxf86vm1
 
     filesets:
