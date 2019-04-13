@@ -28,7 +28,7 @@ license: GPL-2.0+
 
 adopt-info: filezilla
 base: core18
-confinement: devmode
+confinement: strict
 grade: devel
 
 plugs:
