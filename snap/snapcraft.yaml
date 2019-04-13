@@ -206,13 +206,13 @@ parts:
     # Crash dialog support
     - binutils
     filesets:
-      library-shared:
-      - '**/lib/**/*.so*'
       crash-dialog-support:
       - usr/bin/*addr2line
+      library-shared:
+      - '**/lib/**/*.so*'
     prime:
-    - $library-shared
     - $crash-dialog-support
+    - $library-shared
 
   filezilla:
     after:
