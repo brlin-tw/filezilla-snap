@@ -139,6 +139,9 @@ print_usage(){
 }
 
 check_runtime_dependencies(){
+    # still-success|failure
+    local check_result=still-success
+
     for depending_command in \
         curl \
         cut \
@@ -158,9 +161,15 @@ check_runtime_dependencies(){
                 "${FUNCNAME[0]}" \
                 "${depending_command}" \
                 >&2
-            return 1
+            check_result=failure
         fi
     done
+
+    if test "${check_result}" = failure; then
+        return 1
+    else
+        return 0
+    fi
 }
 
 # Parse and store upstream latest release information in each passed-in
