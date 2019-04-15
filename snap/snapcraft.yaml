@@ -250,7 +250,9 @@ parts:
     - curl
     - git
     - html-xml-utils
+    - subversion
     - jq
+    - wget
 
     - libgnutls28-dev
     - libpugixml-dev
