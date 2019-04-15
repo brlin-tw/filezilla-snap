@@ -160,8 +160,6 @@ parts:
 
     source: https://download.filezilla-project.org/libfilezilla/libfilezilla-0.15.1.tar.bz2
     source-checksum: sha512/d557f7636bfc3958b8558fab3384b0ea84caea594566d39c051f20f02dfd71213369c50df282a3f7d2dd757038bd26e9722214839dab965cb7cde9733d59883a
-    #source: https://svn.filezilla-project.org/svn/libfilezilla/tags/0.15.1
-    #source-type: svn
 
     plugin: autotools
     configflags:
