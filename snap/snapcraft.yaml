@@ -223,20 +223,14 @@ parts:
     - ccache
 
     - libfilezilla
+    - scriptlets
     - selective-checkout
     - wxwidgets-sdk
 
-    source: https://download.filezilla-project.org/client/FileZilla_3.41.2_src.tar.bz2
-    source-checksum: sha256/c23be24831f115748b4fd2c126840f0318e5b4da5cd3da1b03daaef9f7dff017
-    #source: https://svn.filezilla-project.org/svn/FileZilla3/tags/3.39.0
-    #source: https://svn.filezilla-project.org/svn/FileZilla3/trunk
-    #source-type: svn
-    override-pull: |
-      set -o nounset
-      snapcraftctl pull
-      "${SNAPCRAFT_STAGE}"/scriptlets/selective-checkout \
-        --append-packaging-revision
-
+    # The actually pulling occurs in filezilla-pull
+    source: https://svn.filezilla-project.org/svn/FileZilla3/trunk
+    source-type: svn
+    override-pull: "${SNAPCRAFT_STAGE}/scriptlets/filezilla-pull"
     plugin: autotools
     configflags:
     # Speed up one-time build
@@ -253,6 +247,12 @@ parts:
 
     build-packages:
     - gettext
+
+    # filezilla-pull scriptlet dependencies
+    - git
+    - html-xml-utils
+    - jq
+
     - libgnutls28-dev
     - libpugixml-dev
     - libsqlite3-dev

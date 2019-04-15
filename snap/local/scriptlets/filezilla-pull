@@ -1,0 +1,267 @@
+#!/usr/bin/env bash
+# Pull script for filezilla part, to solve the problem where the
+# upstream didn't tag the release properly in VCS
+# 林博仁(Buo-ren, Lin) <Buo.Ren.Lin@gmail.com> © 2019
+
+set \
+    -o errexit \
+    -o errtrace \
+    -o nounset \
+    -o pipefail
+
+init(){
+    local \
+        checkout_mode=snapshot \
+        flag_dry_run=false \
+        upstream_latest_version=unknown \
+        upstream_latest_source_tarball_filename \
+        upstream_latest_source_tarball_url \
+        packaging_revision \
+        snapcraft_project_directory \
+        snap_version_in_channel \
+        snap_version_string
+
+    if ! check_runtime_dependencies; then
+        printf -- \
+            'filezilla-pull: Error: Runtime dependency unsatisfied, program cannot continue.\n' \
+            1>&2
+        exit 1
+    fi
+
+    for commandline_argument in "${@}"; do
+        case "${commandline_argument}" in
+            # Enable execution tracing
+            --debug)
+                set -o xtrace
+            ;;
+            # Don't run snapcraftctl for testing purpose
+            --dry-run)
+                flag_dry_run=true
+            ;;
+            --usage)
+                print_usage
+                exit 0
+            ;;
+            *)
+                printf -- \
+                    'filezilla-pull: Error: Invalid command-line argument.\n' \
+                    >&2
+                print_usage
+                exit 1
+            ;;
+        esac
+    done
+
+    parse_upstream_latest_release \
+        upstream_latest_source_tarball_filename \
+        upstream_latest_source_tarball_url \
+        upstream_latest_version
+
+    if ! is_latest_release_promoted \
+        "${SNAPCRAFT_PROJECT_NAME}" \
+        "${upstream_latest_version}" \
+        stable \
+        snap_version_in_channel; then
+        checkout_mode=release
+        upstream_version="${upstream_latest_version}"
+
+        printf --  \
+            "filezilla-pull: Upstream latest version(%s) hasn't been promoted to the snap's %s channel(%s), checking out the latest version.\\n" \
+            "${upstream_latest_version}" \
+            stable \
+            "${snap_version_in_channel}"
+
+        # FIXME: Implement checksum verification
+        # FIXME: Support compression type auto-detection
+        wget \
+            --output-document=- \
+            --quiet \
+            "${upstream_latest_source_tarball_url}" \
+            | tar \
+                --bzip2 \
+                --extract \
+                --strip-components=1
+    else
+        checkout_mode=snapshot
+
+        printf --  \
+            "filezilla-pull: Upstream latest version(%s) has been promoted to the snap's %s channel, checking out the current development snapshot.\\n" \
+            "${upstream_latest_version}" \
+            stable
+        if test "${flag_dry_run}" = false; then
+            snapcraftctl pull
+            upstream_version="${upstream_latest_version}"+dev-rev"$(
+                svn info \
+                    --show-item revision
+            )"
+        fi
+    fi
+
+    # WORKAROUND:
+    #   Allow fetching project revision in multipass build
+    #   environment, which uses out-of-tree build and packaging
+    #   source tree repo location can't be determined via environment
+    #   Unable to determine project version info in multipass build environment - snapcraft - snapcraft.io
+    #   https://forum.snapcraft.io/t/unable-to-determine-project-version-info-in-multipass-build-environment/10416
+    if test -d /root/project; then
+        snapcraft_project_directory=/root/project
+    else
+        # _project_dir_/parts/_part_name_/src
+        snapcraft_project_directory=../../..
+    fi
+
+    packaging_revision="$(
+        git \
+            -C "${snapcraft_project_directory}" \
+            describe \
+            --abbrev=4 \
+            --always \
+            --match nothing \
+            --dirty=-d
+    )"
+
+    snap_version_string="${upstream_version}+pkg-${packaging_revision}"
+
+    printf -- \
+        'filezilla-pull: Setting snap version to "%s".\n' \
+        "${snap_version_string}"
+    if [ "${flag_dry_run}" = false ]; then
+        snapcraftctl set-version \
+            "${snap_version_string}"
+    fi
+
+    exit 0
+}
+
+print_usage(){
+    printf -- 'Usage: filezilla-pull [options] _snap_name_\n'
+    printf -- 'options: [--debug|--dry-run|--help]\n'
+}
+
+check_runtime_dependencies(){
+    for depending_command in \
+        curl \
+        cut \
+        git \
+        grep \
+        hxclean \
+        hxselect \
+        jq \
+        sed \
+        sort \
+        svn \
+        tail \
+        wget; do
+        if ! command -v "${depending_command}" &>/dev/null; then
+            printf -- \
+                '%s: Error: The "%s" command is not in your command search PATHs, please check its installation.\n' \
+                "${FUNCNAME[0]}" \
+                "${depending_command}" \
+                >&2
+            return 1
+        fi
+    done
+}
+
+# Parse and store upstream latest release information in each passed-in
+# variable name references
+# https://trac.filezilla-project.org/ticket/11897#comment:2
+parse_upstream_latest_release(){
+    local -n ref_upstream_latest_source_tarball_filename="${1}"; shift
+    local -n ref_upstream_latest_source_tarball_url="${1}"; shift
+    local -n ref_upstream_latest_version="${1}"; shift
+
+    local \
+        download_listing_webpage \
+        download_listing_webpage_cleaned \
+        upstream_latest_source_tarball_url_trailing \
+        temporary_directory
+
+    temporary_directory="$(
+        mktemp \
+            --directory \
+            --tmpdir \
+            filezilla-pull.XXXXXX
+    )"
+
+    download_listing_webpage="${temporary_directory}"/downloads.html
+    download_listing_webpage_cleaned="${temporary_directory}"/downloads.cleaned.html
+
+    wget \
+        --output-document="${download_listing_webpage}" \
+        --quiet \
+        'https://filezilla-project.org/download.php?type=client&show_all=1'
+    hxclean \
+        "${download_listing_webpage}" \
+        > "${download_listing_webpage_cleaned}"
+
+    ref_upstream_latest_source_tarball_url="$(
+        hxselect \
+            -c \
+            -s '\n' '::attr(href)' <"${download_listing_webpage_cleaned}" \
+            | grep \
+                '/FileZilla_.*_src.tar.*'
+    )"
+
+    upstream_latest_source_tarball_url_trailing="${ref_upstream_latest_source_tarball_url##*/}"
+    ref_upstream_latest_source_tarball_filename="${upstream_latest_source_tarball_url_trailing%%\?*}"
+    unset latest_upstream_source_tarball_url_trailing
+
+    ref_upstream_latest_version="$(
+        cut \
+            --delimiter=_ \
+            --fields=2 <<< "${ref_upstream_latest_source_tarball_filename}" \
+            | grep \
+                --invert-match \
+                latest \
+            | sort \
+                --unique \
+                --version-sort \
+            | tail \
+                --lines=1
+    )"
+
+    rm \
+        --recursive \
+        --force \
+        "${temporary_directory}"
+
+    unset \
+        download_listing_webpage \
+        download_listing_webpage_cleaned \
+        temporary_directory
+}
+
+# Return successfully if the upstream latest release is promoted to the
+# specified snap release channel
+is_latest_release_promoted(){
+    local snap_identifier="${1}"; shift
+    local upstream_latest_version="${1}"; shift
+    local snap_release_channel="${1}"; shift
+    local -n ref_snap_version_in_channel="${1}"; shift
+
+    if ! grep \
+        --quiet \
+        '/' <<< "${snap_release_channel}"; then
+        snap_release_channel=latest/"${snap_release_channel}"
+    fi
+
+    ref_snap_version_in_channel="$(
+        curl \
+            --silent \
+            --show-error \
+            --unix-socket /run/snapd.socket \
+            http://localhost/v2/find?name="${snap_identifier}" \
+            | jq ".result | .[0].channels.\"${snap_release_channel}\".version" \
+            | cut \
+                --delimiter='"' \
+                --fields=2
+    )"
+    if test "${upstream_latest_version}" != "${ref_snap_version_in_channel}"; then
+        return 1
+    else
+        return 0
+    fi
+}
+
+init "${@}"
