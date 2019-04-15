@@ -247,6 +247,7 @@ parts:
     - gettext
 
     # filezilla-pull scriptlet dependencies
+    - curl
     - git
     - html-xml-utils
     - jq
