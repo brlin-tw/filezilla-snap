@@ -222,7 +222,6 @@ parts:
     # For speeding up build
     - ccache
 
-    #- gnutls
     - libfilezilla
     - selective-checkout
     - wxwidgets-sdk
