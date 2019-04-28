@@ -71,6 +71,9 @@ plugs:
   # Inhibit power management
   screen-inhibit-control:
 
+  # For accessing SFTP servers
+  ssh-keys:
+
 apps:
   filezilla:
     adapter: full
