@@ -25,4 +25,4 @@
 s/^\(Name\(\[.\+\]\)\?=.*\)$/\1 (Snap)/g
 
 ## Fix-up application icon lookup
-s|^Icon=.*|Icon=\${SNAP}/meta/gui/icon.svg|
+s|^Icon=.*|Icon=share/icons/hicolor/scalable/apps/filezilla.svg|
